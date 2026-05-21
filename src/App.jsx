@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import FlashcardForm from './components/FlashcardForm';
 import TableRow from './components/TableRow';
 import Flashcard from './components/Flashcard';
@@ -31,43 +31,42 @@ const App = () => {
   }, [allDecks]);
 
   useEffect(() => {
-  if (cards.length === 0) {
-    setLoading(true);
-    fetch('https://opentdb.com/api.php?amount=50&type=boolean')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.results) {
-          const loadedCards = data.results.map((item, index) => ({
-            id: Date.now() + index + Math.random(),
-            front: decryptHTML(item.question),
-            back: decryptHTML(item.correct_answer),
-            learned: false
-          }));
+    if (cards.length === 0) {
+      setLoading(true);
+      fetch('https://opentdb.com/api.php?amount=50&type=boolean')
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.results) {
+            const loadedCards = data.results.map((item, index) => ({
+              id: Date.now() + index + Math.random(),
+              front: decryptHTML(item.question),
+              back: decryptHTML(item.correct_answer),
+              learned: false
+            }));
 
-          setAllDecks((prev) => {
-            const copy = [...prev];
-            if (copy[currentDeckIndex]) {
-              copy[currentDeckIndex].cards = loadedCards;
-            }
-            return copy;
-          });
-        }
-      })
-      .catch((err) => console.log('Ошибка API: ', err))
-      .finally(() => setLoading(false));
-  }
- }, [cards.length, currentDeckIndex]);
+            setAllDecks((prev) => {
+              const copy = [...prev];
+              if (copy[currentDeckIndex]) {
+                copy[currentDeckIndex].cards = loadedCards;
+              }
+              return copy;
+            });
+          }
+        })
+        .catch((err) => console.log('Ошибка API: ', err))
+        .finally(() => setLoading(false));
+    }
+  }, [cards.length, currentDeckIndex]);
 
   const filteredCards = cards.filter((card) => {
     if (filter === 'unlearned') return !card.learned;
     return true;
   });
 
-  const handleAddCard = (front, back) => {
+  const handleAddCard = useCallback((front, back) => {
     setAllDecks((prev) => {
       const copy = [...prev];
       const targetCards = copy[currentDeckIndex].cards;
-
       if (editData) {
         const updatedCard = { id: Date.now(), front, back, learned: editData.learned };
         copy[currentDeckIndex].cards = [...targetCards, updatedCard];
@@ -79,9 +78,9 @@ const App = () => {
       return copy;
     });
     setCurrentIndex(0);
-  };
+  }, [currentDeckIndex, editData]);
 
-  const handleToggleLearned = (id) => {
+  const handleToggleLearned = useCallback((id) => {
     setAllDecks((prev) => {
       const copy = [...prev];
       copy[currentDeckIndex].cards = copy[currentDeckIndex].cards.map((card) =>
@@ -89,21 +88,21 @@ const App = () => {
       );
       return copy;
     });
-  };
+  }, [currentDeckIndex]);
 
-  const handleDeleteCard = (id) => {
+  const handleDeleteCard = useCallback((id) => {
     setAllDecks((prev) => {
       const copy = [...prev];
       copy[currentDeckIndex].cards = copy[currentDeckIndex].cards.filter((card) => card.id !== id);
       return copy;
     });
     setCurrentIndex(0);
-  };
+  }, [currentDeckIndex]);
 
-  const handleEditCard = (card) => {
+  const handleEditCard = useCallback((card) => {
     setEditData(card);
     handleDeleteCard(card.id);
-  };
+  }, [handleDeleteCard]);
 
   const handleShuffle = () => {
     if (cards.length < 2) return;
@@ -155,8 +154,8 @@ const App = () => {
       <div className="deck-zone">
         <div>
           <label>Колода: </label>
-          <select 
-            value={currentDeckIndex} 
+          <select
+            value={currentDeckIndex}
             onChange={(e) => {
               setCurrentDeckIndex(Number(e.target.value));
               setCurrentIndex(0);
@@ -164,7 +163,7 @@ const App = () => {
           >
             {allDecks.map((deck, index) => (
               <option key={index} value={index}>
-                
+
                 {deck.name}
 
               </option>
@@ -173,9 +172,9 @@ const App = () => {
         </div>
 
         <form onSubmit={handleCreateDeck}>
-          <input 
-            type="text" 
-            placeholder="Имя новой колоды" 
+          <input
+            type="text"
+            placeholder="Имя новой колоды"
             value={newDeckName}
             onChange={(e) => setNewDeckName(e.target.value)}
           />

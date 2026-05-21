@@ -23,4 +23,4 @@ const TableRow = ({ card, onToggle, onDelete, onEdit }) => {
   );
 };
 
-export default TableRow;
+export default React.memo(TableRow);
