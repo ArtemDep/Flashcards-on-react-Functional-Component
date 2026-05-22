@@ -4,11 +4,6 @@ import TableRow from './components/TableRow';
 import Flashcard from './components/Flashcard';
 import './App.css';
 
-const decryptHTML = (html) => {
-  const div = document.createElement('div');
-  div.innerHTML = html;
-  return div.innerText;
-};
 
 const App = () => {
   const [allDecks, setAllDecks] = useState(() => {
@@ -39,8 +34,8 @@ const App = () => {
           if (data.results) {
             const loadedCards = data.results.map((item, index) => ({
               id: Date.now() + index + Math.random(),
-              front: decryptHTML(item.question),
-              back: decryptHTML(item.correct_answer),
+              front: item.question,
+              back: item.correct_answer,
               learned: false
             }));
 

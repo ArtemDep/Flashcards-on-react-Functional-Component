@@ -11,8 +11,8 @@ const FlashcardForm = ({ onAdd, editData }) => {
     }
   }, [editData]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = (event) => {
+    event.preventDefault();
     if (!front.trim() || !back.trim()) return;
 
     onAdd(front.trim(), back.trim());
@@ -26,13 +26,13 @@ const FlashcardForm = ({ onAdd, editData }) => {
         type="text"
         placeholder="Лицевая сторона"
         value={front}
-        onChange={(e) => setFront(e.target.value)}
+        onChange={(event) => setFront(event.target.value)}
       />
       <input
         type="text"
         placeholder="Обратная сторона"
         value={back}
-        onChange={(e) => setBack(e.target.value)}
+        onChange={(event) => setBack(event.target.value)}
       />
       <button type="submit" className="btn-create">
         {editData ? 'Сохранить карту' : 'Создать карточку'}
